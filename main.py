@@ -2,17 +2,27 @@ import tkinter as tk
 import time
 def start():
     global t
-    if t>1:
-        t=t-1
-        min=t//60
-        sec=t%60
-        ct = f"{min:02}:{sec:02}"
+    global starting_time
+    if starting_time==0:
+        starting_time=time.time()
+    
+    current_time=time.time()
+    time_elapsed= int(current_time - starting_time)
+    remaining_time=t-time_elapsed
+    if remaining_time>0:
+        mins=remaining_time//60
+        secs=remaining_time%60
+        ct=f'{mins:02}:{secs:02}'
         counter.config(text=ct)
-        root.after(1000,start)
+        root.after(100,start)
+    elif remaining_time==0:
+        counter.config(text="00:00")
         
+    
 
 
-t=1800
+starting_time=0
+t=1799
 
 root = tk.Tk()
 root.title("Timer")
