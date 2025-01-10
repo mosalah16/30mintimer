@@ -1,12 +1,16 @@
 import tkinter as tk
 import time
+import pygame
+
+pygame.mixer.init()
+
 def start():
     global t
     global starting_time
     if starting_time==0:
-        starting_time=time.time()
+        starting_time=int(time.monotonic())
     
-    current_time=time.time()
+    current_time=int(time.monotonic())
     time_elapsed= int(current_time - starting_time)
     remaining_time=t-time_elapsed
     if remaining_time>0:
@@ -17,6 +21,10 @@ def start():
         root.after(100,start)
     elif remaining_time==0:
         counter.config(text="00:00")
+        pygame.mixer.music.load("Kalimba.mp3")
+        pygame.mixer.music.play()
+        
+
         
     
 
