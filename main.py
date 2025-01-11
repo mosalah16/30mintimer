@@ -1,3 +1,4 @@
+from tkinter import *
 import tkinter as tk
 import time
 import pygame
@@ -24,22 +25,41 @@ def start():
         pygame.mixer.music.load("Kalimba.mp3")
         pygame.mixer.music.play()
         
-
+def change():
+    global t
+    x=changet.get()
+    x=int(x)*60
+    if x!=0:
+        t=x
+    elif x==0:
+        t=1800
         
     
 
 
 starting_time=0
-t=1799
+t=1800
 
 root = tk.Tk()
 root.title("Timer")
 
-counter=tk.Label(root, text="30:00")
-counter.pack(pady=100,padx=100)
+txt=Label(root, text='By picking 0 you are setting it to a default 30 minutes')
+txt.grid(row=1)
 
-starting_button = tk.Button(root, text="start", command=start, width=10)
-starting_button.pack(pady=5)
+
+changet=IntVar()
+changet=Spinbox(root, from_=0, to=120)
+changet.grid(row=0, column=0)
+
+
+
+counter=tk.Label(root, text="Pick your time in min and press start")
+counter.grid(row=3)
+
+starting_button = tk.Button(root, text="start", command=start, width=5)
+starting_button.grid(row=2)
+change_button = tk.Button(root, text="change", command=change, width=5)
+change_button.grid(row=0, column=1)
 
 root.mainloop()
 
