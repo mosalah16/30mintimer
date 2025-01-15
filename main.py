@@ -39,6 +39,7 @@ def change():
 
 def reset():
     global remaining_time, starting_time
+    pygame.mixer.music.pause()
     starting_time=0
     remaining_time=t
     mins=t//60
