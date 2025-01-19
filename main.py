@@ -1,10 +1,9 @@
 import time
 import tkinter as tk
 
-import pygame
+#import pygame
 
 TARGET_DURATION = 1800
-
 
 class Time:
     target_duration: int
@@ -17,6 +16,9 @@ class Time:
     def start(self) -> None:
         if self.starting_time is None:
             self.starting_time = int(time.monotonic())
+    
+    def change(self, new_time: int) -> None:
+        self.target_duration=new_time
 
     def reset(self) -> None:
         self.starting_time = None
@@ -43,36 +45,58 @@ class Counter:
 
     def reset(self) -> None:
         self.time.reset()
-
-    def stop(self) -> None:
-        pygame.mixer.music.load("assets/Kalimba.mp3")
-        pygame.mixer.music.play()
-
-    def update(self) -> None:
+    
+    def change(self) -> None:
+        new_time=(int(change_time.get()))*60
+        if new_time==0:
+            new_time=1800
+        self.time.change(new_time)
+        self.time.reset()
+        self.update(new_time)
+    
+    def run(self):
         remaining_time = self.time.remaining_time()
-        formatted_remaining_time = self.time.format_remaining_time(remaining_time)
-        self.widget.config(text=formatted_remaining_time)
+        self.update(remaining_time)
         if remaining_time == 0:
             self.stop()
         else:
-            root.after(100, self.update)
+            root.after(100, self.run)
+
+
+    def stop(self) -> None:
+        pass
+        #pygame.mixer.music.load("assets/Kalimba.mp3")
+        #pygame.mixer.music.play()
+
+    def update(self, new_time: int) -> None:
+        new_time = self.time.format_remaining_time(new_time)
+        self.widget.config(text=new_time)
+        
 
 
 if __name__ == "__main__":
-    pygame.mixer.init()
+    #pygame.mixer.init()
 
     root = tk.Tk()
     root.title("Timer")
 
     counter_widget = tk.Label(root, text=Time.format_remaining_time(TARGET_DURATION))
-    counter_widget.grid(row=3)
+    counter_widget.grid(row=1)
 
     counter = Counter(target_duration=TARGET_DURATION, widget=counter_widget)
 
-    starting_button = tk.Button(root, text="start", command=counter.update, width=5)
+    starting_button = tk.Button(root, text="start", command=counter.run, width=5)
     starting_button.grid(row=2)
 
-    reset_button = tk.Button(root, text="start", command=counter.reset, width=5)
-    reset_button.grid(row=1)
+    reset_button = tk.Button(root, text="reset", command=counter.reset, width=5)
+    reset_button.grid(row=3)
+
+    change_button = tk.Button(root, text="change", command=counter.change, width=5)
+    change_button.grid(row=4)
+
+    change_time=tk.IntVar()
+    change_time=tk.Spinbox(root, from_=0, to=10000)
+    change_time.grid(row=0)
+
 
     root.mainloop()
