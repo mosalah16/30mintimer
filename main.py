@@ -1,78 +1,103 @@
-from tkinter import *
-import tkinter as tk
 import time
-import pygame
+import tkinter as tk
+from pathlib import Path
 
-pygame.mixer.init()
+from pygame.mixer import Sound
+from pygame.mixer import init as init_pygame_mixer
 
-def start():
-    global t,starting_time,remaining_time
-    if starting_time==0:
-        starting_time=int(time.monotonic())
-    
-    current_time=int(time.monotonic())
-    time_elapsed= int(current_time - starting_time)
-    remaining_time=t-time_elapsed
-    if remaining_time>0:
-        mins=remaining_time//60
-        secs=remaining_time%60
-        ct=f'{mins:02}:{secs:02}'
-        counter.config(text=ct)
-        root.after(100,start)
-    elif remaining_time==0:
-        counter.config(text="00:00")
-        pygame.mixer.music.load('assets/Kalimba.mp3')
-        pygame.mixer.music.play()
+DEFAULT_TARGET_DURATION = 1800
+PATH_TO_MUSIC = Path("assets/Kalimba.mp3")
+
+
+class Time:
+    target_duration: int
+    starting_time: int
+
+    def __init__(self, target_duration: int) -> None:
+        self.target_duration = target_duration
+        self.starting_time = None
+
+    def _set_starting_time(self) -> None:
+        if self.starting_time is None:
+            self.starting_time = int(time.monotonic())
+
+    def update_target_duration(self, new_time: int) -> None:
+        self.target_duration = new_time
+
+    def reset(self) -> None:
+        self.starting_time = None
+
+    def _time_elapsed(self) -> int:
+        self._set_starting_time()
+        return int(time.monotonic()) - self.starting_time
+
+    def remaining_time(self) -> int:
+        return self.target_duration - self._time_elapsed()
+
+
+class Counter:
+    def __init__(self, target_duration: int, widget: tk.Label) -> None:
+        self.target_duration = target_duration
+        self.widget = widget
+        self.time = Time(target_duration)
+        init_pygame_mixer()
+        self.sound = Sound(PATH_TO_MUSIC)
         
-def change():
-    global t
-    x=changet.get()
-    x=int(x)*60
-    if x!=0:
-        t=x
-        mins=t//60
-        secs=t%60
-        ct=f'{mins:02}:{secs:02}'
-        counter.config(text=ct)
-    elif x==0:
-        t=1800
 
-def reset():
-    global remaining_time, starting_time
-    pygame.mixer.music.pause()
-    starting_time=0
-    remaining_time=t
-    mins=t//60
-    secs=t %60
-    ct=f'{mins:02}:{secs:02}'
-    counter.config(text=ct)
+    def reset(self) -> None:
+        self.sound.stop()
+        self.time.reset()
 
+    def change(self) -> None:
+        new_target_duration = (int(change_time.get())) * 60
+        self.time.update_target_duration(new_target_duration)
+        self.reset()
+        self.update_display_remaining_time(new_target_duration)
 
-remaining_time=0
-starting_time=0
-t=1800
+    def run(self):
+        remaining_time = self.time.remaining_time()
+        self.update_display_remaining_time(remaining_time)
+        if remaining_time == 0:
+            self.finish()
+        else:
+            root.after(100, self.run)
 
-root = tk.Tk()
-root.title("Timer")
+    def finish(self) -> None:
+        self.sound.play()
 
+    def update_display_remaining_time(self, new_time: int) -> None:
+        new_time = self.format_remaining_time(new_time)
+        self.widget.config(text=new_time)
 
-changet=IntVar()
-changet=Spinbox(root, from_=0, to=10000)
-changet.grid(row=0, column=0)
+    @staticmethod
+    def format_remaining_time(remaining_time: int) -> None:
+        mins = remaining_time // 60
+        secs = remaining_time % 60
+        return f"{mins:02}:{secs:02}"
 
 
-counter=tk.Label(root, text="30:00")
-counter.grid(row=3)
+if __name__ == "__main__":
+    root = tk.Tk()
+    root.title("Timer")
 
-starting_button = tk.Button(root, text="start", command=start, width=5)
-starting_button.grid(row=2)
-change_button = tk.Button(root, text="change", command=change, width=5)
-change_button.grid(row=0, column=1)
-reset_button = tk.Button(root, text="reset",command=reset, width=5)
-reset_button.grid(row=2, column=1)
+    counter_widget = tk.Label(
+        root, text=Counter.format_remaining_time(DEFAULT_TARGET_DURATION)
+    )
+    counter_widget.grid(row=1)
 
-root.mainloop()
+    counter = Counter(target_duration=DEFAULT_TARGET_DURATION, widget=counter_widget)
 
+    change_time = tk.IntVar()
+    change_time = tk.Spinbox(root, from_=1, to=10000, state="readonly")
+    change_time.grid(row=0)
 
+    starting_button = tk.Button(root, text="start", command=counter.run, width=5)
+    starting_button.grid(row=2)
 
+    reset_button = tk.Button(root, text="reset", command=counter.reset, width=5)
+    reset_button.grid(row=3)
 
+    change_button = tk.Button(root, text="change", command=counter.change, width=5)
+    change_button.grid(row=4)
+
+    root.mainloop()
