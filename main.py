@@ -39,10 +39,10 @@ class Counter:
     def __init__(self, target_duration: int, widget: tk.Label) -> None:
         self.target_duration = target_duration
         self.widget = widget
-
         self.time = Time(target_duration)
-        self.sound = Sound(PATH_TO_MUSIC)
         init_pygame_mixer()
+        self.sound = Sound(PATH_TO_MUSIC)
+        
 
     def reset(self) -> None:
         self.sound.stop()
