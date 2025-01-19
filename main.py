@@ -1,9 +1,9 @@
 import time
 import tkinter as tk
 
-# import pygame
+import pygame
 
-TARGET_DURATION = 1800
+DEFAULT_TARGET_DURATION = 1800
 
 
 class Time:
@@ -43,8 +43,6 @@ class Counter:
 
     def change(self) -> None:
         new_time = (int(change_time.get())) * 60
-        if new_time == 0:
-            new_time = 1800
         self.time.change(new_time)
         self.time.reset()
         self.update_display_remaining_time(new_time)
@@ -59,8 +57,8 @@ class Counter:
 
     def stop(self) -> None:
         pass
-        # pygame.mixer.music.load("assets/Kalimba.mp3")
-        # pygame.mixer.music.play()
+        pygame.mixer.music.load("assets/Kalimba.mp3")
+        pygame.mixer.music.play()
 
     def update_display_remaining_time(self, new_time: int) -> None:
         new_time = self.format_remaining_time(new_time)
@@ -74,15 +72,21 @@ class Counter:
 
 
 if __name__ == "__main__":
-    # pygame.mixer.init()
+    pygame.mixer.init()
 
     root = tk.Tk()
     root.title("Timer")
 
-    counter_widget = tk.Label(root, text=Counter.format_remaining_time(TARGET_DURATION))
+    counter_widget = tk.Label(
+        root, text=Counter.format_remaining_time(DEFAULT_TARGET_DURATION)
+    )
     counter_widget.grid(row=1)
 
-    counter = Counter(target_duration=TARGET_DURATION, widget=counter_widget)
+    counter = Counter(target_duration=DEFAULT_TARGET_DURATION, widget=counter_widget)
+
+    change_time = tk.IntVar()
+    change_time = tk.Spinbox(root, from_=1, to=10000, state="readonly")
+    change_time.grid(row=0)
 
     starting_button = tk.Button(root, text="start", command=counter.run, width=5)
     starting_button.grid(row=2)
@@ -92,9 +96,5 @@ if __name__ == "__main__":
 
     change_button = tk.Button(root, text="change", command=counter.change, width=5)
     change_button.grid(row=4)
-
-    change_time = tk.IntVar()
-    change_time = tk.Spinbox(root, from_=0, to=10000)
-    change_time.grid(row=0)
 
     root.mainloop()
