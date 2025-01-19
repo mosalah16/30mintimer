@@ -3,6 +3,7 @@ import tkinter as tk
 from pathlib import Path
 
 from pygame.mixer import Sound
+from pygame.mixer import init as init_pygame_mixer
 
 DEFAULT_TARGET_DURATION = 1800
 PATH_TO_MUSIC = Path("assets/Kalimba.mp3")
@@ -41,6 +42,7 @@ class Counter:
 
         self.time = Time(target_duration)
         self.sound = Sound(PATH_TO_MUSIC)
+        init_pygame_mixer()
 
     def reset(self) -> None:
         self.sound.stop()
