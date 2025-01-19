@@ -1,9 +1,11 @@
 import time
 import tkinter as tk
+from pathlib import Path
 
-import pygame
+from pygame.mixer import Sound
 
 DEFAULT_TARGET_DURATION = 1800
+PATH_TO_MUSIC = Path("assets/Kalimba.mp3")
 
 
 class Time:
@@ -18,7 +20,7 @@ class Time:
         if self.starting_time is None:
             self.starting_time = int(time.monotonic())
 
-    def change(self, new_time: int) -> None:
+    def update_target_duration(self, new_time: int) -> None:
         self.target_duration = new_time
 
     def reset(self) -> None:
@@ -35,30 +37,31 @@ class Time:
 class Counter:
     def __init__(self, target_duration: int, widget: tk.Label) -> None:
         self.target_duration = target_duration
-        self.time = Time(target_duration)
         self.widget = widget
 
+        self.time = Time(target_duration)
+        self.sound = Sound(PATH_TO_MUSIC)
+
     def reset(self) -> None:
+        self.sound.stop()
         self.time.reset()
 
     def change(self) -> None:
-        new_time = (int(change_time.get())) * 60
-        self.time.change(new_time)
-        self.time.reset()
-        self.update_display_remaining_time(new_time)
+        new_target_duration = (int(change_time.get())) * 60
+        self.time.update_target_duration(new_target_duration)
+        self.reset()
+        self.update_display_remaining_time(new_target_duration)
 
     def run(self):
         remaining_time = self.time.remaining_time()
         self.update_display_remaining_time(remaining_time)
         if remaining_time == 0:
-            self.stop()
+            self.finish()
         else:
             root.after(100, self.run)
 
-    def stop(self) -> None:
-        pass
-        pygame.mixer.music.load("assets/Kalimba.mp3")
-        pygame.mixer.music.play()
+    def finish(self) -> None:
+        self.sound.play()
 
     def update_display_remaining_time(self, new_time: int) -> None:
         new_time = self.format_remaining_time(new_time)
@@ -72,8 +75,6 @@ class Counter:
 
 
 if __name__ == "__main__":
-    pygame.mixer.init()
-
     root = tk.Tk()
     root.title("Timer")
 
