@@ -1,13 +1,21 @@
 import time
 import tkinter as tk
 from pathlib import Path
+import sys
+import os
 
 from pygame.mixer import Sound
 from pygame.mixer import init as init_pygame_mixer
 
 DEFAULT_TARGET_DURATION = 1800
-PATH_TO_MUSIC = Path("assets/Kalimba.mp3")
 
+
+def resource_path(relative_path: str) -> Path:
+    if hasattr(sys, "_MEIPASS"):
+        return Path(os.path.join(sys._MEIPASS, relative_path))
+    return Path(relative_path)
+
+PATH_TO_MUSIC = resource_path("assets/Kalimba.mp3")
 
 class Time:
     target_duration: int
