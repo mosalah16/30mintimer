@@ -50,19 +50,28 @@ class Counter:
         self.time = Time(target_duration)
         init_pygame_mixer()
         self.sound = Sound(PATH_TO_MUSIC)
-        
+        self.running = False
+
+    def start(self) -> None:
+        self.running = True
+        self.run()
 
     def reset(self) -> None:
+        self.running = False
         self.sound.stop()
         self.time.reset()
+        self.update_display_remaining_time(self.time.target_duration)
 
     def change(self) -> None:
+        self.running = False
         new_target_duration = (int(change_time.get())) * 60
         self.time.update_target_duration(new_target_duration)
         self.reset()
         self.update_display_remaining_time(new_target_duration)
 
     def run(self):
+        if self.running == False:
+            return
         remaining_time = self.time.remaining_time()
         self.update_display_remaining_time(remaining_time)
         if remaining_time == 0:
@@ -99,7 +108,7 @@ if __name__ == "__main__":
     change_time = tk.Spinbox(root, from_=1, to=10000, state="readonly")
     change_time.grid(row=0)
 
-    starting_button = tk.Button(root, text="start", command=counter.run, width=5)
+    starting_button = tk.Button(root, text="start", command=counter.start, width=5)
     starting_button.grid(row=2)
 
     reset_button = tk.Button(root, text="reset", command=counter.reset, width=5)
